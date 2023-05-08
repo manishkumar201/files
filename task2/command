@@ -1,5 +1,5 @@
-aws cloudformation create-stack --stack-name manish-Stack --template-body file://CFT-master.yaml --region 'us-east-1'
+aws cloudformation create-stack --stack-name manish-Stack --template-body file://task2/CFT-master.yaml --region 'us-east-1'
 
-aws cloudformation create-stack --stack-name manish-slave-Stack --template-body file://files/task2/CFT-slave.yaml --region 'us-east-1'
+aws cloudformation create-stack --stack-name manish-slave-Stack --template-body file://task2/CFT-slave.yaml --region 'us-east-1'
 
 for unsetting the environment variables -> unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
