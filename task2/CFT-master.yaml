@@ -11,11 +11,11 @@ Parameters:
     AllowedValues: 
       - t2.micro
       - t3.medium
-    Default: t2.micro
+    Default: t3.medium
     
   NameofInstance:
     Type: String
-    Default: docker-maven
+    Default: manish-master
     
   SecurityGroup:
     Type: String
