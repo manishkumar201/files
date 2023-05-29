@@ -1,4 +1,25 @@
-sudo apt-get remove docker docker-engine docker.io containerd runc
+#!/bin/bash
+
+sudo apt update
+
+sudo apt install openjdk-17-jdk -y
+
+sudo apt install maven -y
+
+#installing jenkins
+
+curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
+    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+    https://pkg.jenkins.io/debian binary/ | sudo tee \
+    /etc/apt/sources.list.d/jenkins.list > /dev/null
+ 
+sudo apt-get update
+
+sudo apt-get install jenkins -y
+
+#installing docker
 
 sudo apt-get update
 
@@ -7,7 +28,7 @@ sudo apt-get install \
     curl \
     gnupg \
     lsb-release
-    
+
 sudo mkdir -m 0755 -p /etc/apt/keyrings
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -20,4 +41,6 @@ sudo apt-get update
 
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
-sudo docker run hello-world
+chmod 777 /var/run/docker.sock
+
+#DONE

@@ -1,50 +1,49 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: EC2 Jenkins Server
-Parameters:
-  environment:
-    Type: String
-    Default: testing
-  product:
-    Type: String
-    Default: manish
-  service:
-    Type: String
-    Default: vpc
-  keyName:
-    Type: 'AWS::EC2::KeyPair::KeyName'
-    Default: manishImpressico-KP
-  instanceType:
-    Description: InstanceType
-    Type: String
-    Default: t2.micro  
-  securityGroup:
-    Type: 'AWS::EC2::SecurityGroup::Id'
-    Default: sg-0b2124a5b58781a0f
-  vpc:
-    Type: 'AWS::EC2::VPC::Id'
-    Default: vpc-0f4edcd6d70a2a933
-  subnet:
-    Type: 'AWS::EC2::Subnet::Id'
-    Default: subnet-051e64e79b862decc
 
+Parameters:
+  AvailabiliZones:
+    Type: String
+    Description: Can be found on top right side of Screen.
+    Default: us-east-1a
+  
+  TypeofInstance:
+    Type: String
+    Description: must be selected according to need.
+    AllowedValues: 
+      - t2.micro
+      - t3.medium
+    Default: t3.medium
+    
+  NameofInstance:
+    Type: String
+    Default: docker-maven
+    
+  SecurityGroup:
+    Type: String
+    Default: manishImpressico-SG
+    
+  KeyPair:
+    Type: String
+    Default: manishImpressico-KP
+    
+  ImageId:
+    Type: String
+    Default: ami-007855ac798b5175e
+    
 Resources:
-  EC2Instance:
+  CFMmaven:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: !Ref instanceType
-      ImageId: ami-007855ac798b5175e # Ubuntu 22.04 LTS
-      KeyName: !Ref keyName
-      #SecurityGroups:
-      #  - sg-0b2124a5b58781a0f
-      NetworkInterfaces:
-        - AssociatePublicIpAddress: 'true'
-          DeviceIndex: '0'
-          #SubnetId: !Ref subnet
-          GroupSet:     # group set is security group
-          - !ImportValue    # Importvalue automatically imports already existing resources
-              'Fn::Sub': '${environment}-${product}-vpc-generalSG'
-          SubnetId: !ImportValue 
-            'Fn::Sub': '${environment}-${product}-vpc-public-subnet-a'
+      AvailabilityZone: !Ref AvailabiliZones
+      InstanceType: !Ref TypeofInstance
+      ImageId: !Ref ImageId
+      KeyName: !Ref KeyPair
+      SecurityGroups:
+       - !Ref SecurityGroup
+       
+      Tags:
+        - Key: Name
+          Value: !Ref NameofInstance
+          
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -69,6 +68,3 @@ Resources:
           apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
           chmod 777 /var/run/docker.sock
 
-      Tags:
-        - Key: Name
-          Value: !Sub '${environment}-${product}-${service}' 
