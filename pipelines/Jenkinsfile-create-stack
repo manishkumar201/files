@@ -1,0 +1,40 @@
+// use jenkins credentials manager to store id, key and password as secret text and github credentails too as basic username and password. Use secret token as password
+pipeline {
+    agent any
+    environment
+    {
+        AWS_ID = credentials('id')
+        AWS_KEY = credentials('key')
+        AWS_TOKEN = credentials('token')
+        
+        GITHUB_CRED = "gitCred"
+    }
+
+    stages 
+    {
+        stage('Setting aws Credentials')
+        {
+            steps
+            {
+                sh '''
+                    aws configure set aws_access_key_id $AWS_ID
+                    aws configure set aws_secret_access_key $AWS_KEY
+                    aws configure set aws_session_token $AWS_TOKEN
+                    '''
+            }        
+        }
+        
+        stage('cloning repo') {
+            steps {
+                git branch: 'devops/f1TjMB8h/1549' , credentialsId: env.GITHUB_CRED , url: "https://github.com/imp-ress-ico/sandbox.git"
+            }
+        }
+        
+        stage('creating stack') {
+            steps {
+                sh "aws cloudformation create-stack --stack-name manish-slave-Stack --template-body file://aws/services/slave-ec2.yaml --region 'us-east-1'"
+            }
+        }
+    }
+}
+
