@@ -1,0 +1,35 @@
+//save ssh key with give below id only and also download sshagent in jenkins before running this jenkinsfile
+pipeline {
+    agent any
+    environment
+    {   
+        SLAVE_IP = credentials('ssh-pri-key')
+        GIT = credentials('gitCred')
+    }
+    
+    stages {
+        
+        stage('Building Docker image') {
+            steps 
+            {
+                sshagent(['ssh-pri-key']) 
+                {   
+                    //Cloning the REPO
+                    sh 'ssh -o StrictHostKeyChecking=no $SLAVE_IP_USR git clone -b devops/f1TjMB8h/1549 https://$GIT_USR:$GIT_PSW@github.com/imp-ress-ico/sandbox.git'
+                    
+                    //Building and Deploying Containers
+                    sh 'ssh -o StrictHostKeyChecking=no $SLAVE_IP_USR docker build -t portfolio-website-image /home/ubuntu/sandbox/'
+                    sh 'ssh -o StrictHostKeyChecking=no $SLAVE_IP_USR docker run -d -p 80:80 --name portfolio-website-container portfolio-website-image'
+                    
+                }
+                
+            }
+        }
+        
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
