@@ -1,0 +1,68 @@
+Parameters:
+  environment:
+    Type: String
+    Default: testing
+  product:
+    Type: String
+    Default: manish
+  service:
+    Type: String
+    Default: vpc
+  keyName:
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    Default: manishImpressico-KP
+  instanceType:
+    Type: String
+    Description: must be selected according to need.
+    AllowedValues: 
+      - t2.micro
+      - t3.medium
+    Default: t2.micro
+  AvailabiliZones:
+    Type: String
+    Description: Can be found on top right side of Screen.
+    Default: us-east-1a
+  ImageId:
+    Type: String
+    Default: ami-007855ac798b5175e # Ubuntu 22.04 LTS
+    
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !Ref AvailabiliZones
+      InstanceType: !Ref instanceType
+      #ImageId: ami-007855ac798b5175e 
+      ImageId: !Ref ImageId
+      KeyName: !Ref keyName
+      #SecurityGroups:
+      #  - sg-0b2124a5b58781a0f
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          #SubnetId: !Ref subnet
+          GroupSet:     # group set is security group
+          - !ImportValue    # Importvalue automatically imports already existing resources
+              'Fn::Sub': '${environment}-${product}-vpc-generalSG'
+          SubnetId: !ImportValue 
+            'Fn::Sub': '${environment}-${product}-vpc-public-subnet-a'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e
+          apt update
+
+          echo "\n\Aws Cli\n\n"
+          apt install awscli -y
+          
+          echo "\n\nInstalling Jenkins\n\n"
+          apt install openjdk-17-jdk -y
+          apt install maven -y
+          curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+          echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+          apt-get update
+          apt-get install jenkins -y
+
+      Tags:
+        - Key: Name
+          Value: !Sub '${environment}-${product}-${service}' 
